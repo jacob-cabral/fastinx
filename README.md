@@ -1,2 +1,3 @@
 # fastinx
-A Helm Chart to deploy the Nginx as an HTTPS proxy
+
+The Fastinx is a Helm Chart to deploy the NGINX as an HTTPS proxy to a FastCGI service.
