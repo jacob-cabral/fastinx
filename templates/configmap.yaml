@@ -5,16 +5,17 @@ metadata:
   labels:
     {{- include "fastinx.labels" . | nindent 4 }}
 data:
-  APP_HOST: {{ .Values.app.host }}
-  APP_PORT: {{ default 9000 .Values.app.port | quote }}
-  INDEX_FILES: {{ default "index.php" .Values.app.indexFiles | quote }}
-  HTTP_50X_ERROR_PAGE: {{ default "/50x.html" .Values.app.errorPage.http50x}}
-  ERROR_PAGE_ROOT_DIRECTORY: {{ default (include "fastinx.rootDirectory" .) .Values.app.errorPage.rootDirectory }}
+  ERROR_PAGE_ROOT_DIRECTORY: {{ default (include "fastinx.rootDirectory" .) .Values.errorPage.rootDirectory }}
+  HTTP_50X_ERROR_PAGE: {{ default "/50x.html" .Values.errorPage.http50x}}
+  INDEX_FILES: {{ default "index.php" .Values.indexFiles | quote }}
+  PHP_FPM_SERVICE_HOST: {{ .Values.phpfpm.service.host }}
+  PHP_FPM_SERVICE_PORT: {{ default 9000 .Values.phpfpm.service.port | quote }}
+  PHP_FPM_ROOT_DIRECTORY: {{ default (include "fastinx.rootDirectory" .) .Values.phpfpm.rootDirectory }}
   ROOT_DIRECTORY: {{ include "fastinx.rootDirectory" . }}
   SERVER_NAME: {{ .Values.ingress.host | quote }}
   SERVER_PORT: {{ .Values.service.port | quote }}
   SSL_DIRECTORY: {{ include "fastinx.sslDirectory" . }}
-  STATIC_CONTENT_EXTS: {{ include "fastinx.staticContentExt" .}}
+  STATIC_CONTENT_EXTS: {{ include "fastinx.staticContent.extensions" .}}
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -54,7 +55,7 @@ data:
 
       location ~ [^/]\.php(/|$) {
         fastcgi_split_path_info  ^(.+\.php)(/.+)$;
-        fastcgi_pass  ${APP_HOST}:${APP_PORT};
+        fastcgi_pass  ${PHP_FPM_SERVICE_HOST}:${PHP_FPM_SERVICE_PORT};
 
         include       fastcgi_params;
 
@@ -63,10 +64,10 @@ data:
         # Mitigate https://httpoxy.org/ vulnerabilities
         fastcgi_param HTTP_PROXY "";
         fastcgi_param PATH_INFO       $fastcgi_path_info;
-        fastcgi_param SCRIPT_FILENAME $ROOT_DIRECTORY$fastcgi_script_name;
+        fastcgi_param SCRIPT_FILENAME ${PHP_FPM_ROOT_DIRECTORY}$fastcgi_script_name;
       }
 
-      {{- if .Values.app.staticContentCopyHelper.enabled }}
+      {{- if .Values.staticContent.copyHelper.enabled }}
       location ~* \.(${STATIC_CONTENT_EXTS})$ {
         root ${ROOT_DIRECTORY};
       }

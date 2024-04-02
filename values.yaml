@@ -74,21 +74,29 @@ tolerations: []
 
 affinity: {}
 
-app:
-  staticContentCopyHelper:
+indexFiles: null
+
+errorPage:
+  http50x: null
+  rootDirectory: null
+
+rootDirectory: null
+sslDirectory: null
+
+livenessProbe: null
+readinessProbe: null
+
+staticContent:
+  extensions: null
+  copyHelper:
     enabled: false
     image:
       repository: null
       tag: null
     sourceDir: null
-  host: null
-  port: null
-  indexFiles: null
-  errorPage:
-    http50x: null
-    rootDirectory: null
+
+phpfpm:
   rootDirectory: null
-  sslDirectory: null
-  staticContentExt: null
-  livenessProbe: null
-  readinessProbe: null
+  service:
+    host: null
+    port: null

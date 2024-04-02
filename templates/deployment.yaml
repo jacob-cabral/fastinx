@@ -27,13 +27,13 @@ spec:
       serviceAccountName: {{ include "fastinx.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if .Values.app.staticContentCopyHelper.enabled }}
+      {{- if .Values.staticContent.copyHelper.enabled }}
       initContainers:
         - name: static-content-copy-helper
-          image: "{{ .Values.app.staticContentCopyHelper.image.repository }}:{{ .Values.app.staticContentCopyHelper.image.tag }}"
+          image: "{{ .Values.staticContent.copyHelper.image.repository }}:{{ .Values.staticContent.copyHelper.image.tag }}"
           env:
             - name: COPY_FROM
-              value: {{ .Values.app.staticContentCopyHelper.sourceDir }}
+              value: {{ .Values.staticContent.copyHelper.sourceDir }}
             - name: COPY_TO
               value: /static-content
           command:
@@ -41,7 +41,7 @@ spec:
           volumeMounts:
             - name: copy-helper
               mountPath: /usr/local/bin
-            {{- if .Values.app.staticContentCopyHelper.enabled }}
+            {{- if .Values.staticContent.copyHelper.enabled }}
             - name: static-content
               mountPath: /static-content
             {{- end }}
@@ -75,7 +75,7 @@ spec:
           volumeMounts:
           - name: cert
             mountPath: {{ include "fastinx.sslDirectory" . }}
-          {{- if .Values.app.staticContentCopyHelper.enabled }}
+          {{- if .Values.staticContent.copyHelper.enabled }}
           - name: static-content
             mountPath: /usr/share/nginx/html
           {{- end }}
@@ -102,7 +102,7 @@ spec:
         configMap:
           name: {{ include "fastinx.fullname" . }}-templates
           defaultMode: 0444
-      {{- if .Values.app.staticContentCopyHelper.enabled }}
+      {{- if .Values.staticContent.copyHelper.enabled }}
       - name: static-content
         emptyDir: {}
       - name: copy-helper
