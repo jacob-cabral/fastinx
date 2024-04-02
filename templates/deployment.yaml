@@ -37,14 +37,14 @@ spec:
             - name: COPY_TO
               value: /static-content
           command:
-            - bash
-          args:
-            - /usr/local/bin/entrypoint.sh
+            - /usr/local/bin/copy.sh
           volumeMounts:
-            - name: copy-helper-entrypoint
+            - name: copy-helper
               mountPath: /usr/local/bin
+            {{- if .Values.app.staticContentCopyHelper.enabled }}
             - name: static-content
               mountPath: /static-content
+            {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -75,8 +75,10 @@ spec:
           volumeMounts:
           - name: cert
             mountPath: {{ include "fastinx.sslDirectory" . }}
+          {{- if .Values.app.staticContentCopyHelper.enabled }}
           - name: static-content
             mountPath: /usr/share/nginx/html
+          {{- end }}
           - name: templates
             mountPath: /etc/nginx/templates
       {{- with .Values.nodeSelector }}
@@ -103,8 +105,8 @@ spec:
       {{- if .Values.app.staticContentCopyHelper.enabled }}
       - name: static-content
         emptyDir: {}
-      - name: copy-helper-entrypoint
+      - name: copy-helper
         configMap:
-          name: {{ include "fastinx.fullname" . }}-copy-helper-entrypoint
+          name: {{ include "fastinx.fullname" . }}-copy-helper
           defaultMode: 0110
       {{- end }}
