@@ -1,0 +1,143 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "fastinx.fullname" . }}-envs
+  labels:
+    {{- include "fastinx.labels" . | nindent 4 }}
+data:
+  APP_HOST: {{ .Values.app.host }}
+  APP_PORT: {{ default 9000 .Values.app.port | quote }}
+  INDEX_FILES: {{ default "index.php" .Values.app.indexFiles | quote }}
+  HTTP_50X_ERROR_PAGE: {{ default "/50x.html" .Values.app.errorPage.http50x}}
+  ERROR_PAGE_ROOT_DIRECTORY: {{ default (include "fastinx.rootDirectory" .) .Values.app.errorPage.rootDirectory }}
+  ROOT_DIRECTORY: {{ include "fastinx.rootDirectory" . }}
+  SERVER_NAME: {{ .Values.ingress.host | quote }}
+  SERVER_PORT: {{ .Values.service.port | quote }}
+  SSL_DIRECTORY: {{ include "fastinx.sslDirectory" . }}
+  STATIC_CONTENT_EXTS: {{ include "fastinx.staticContentExt" .}}
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "fastinx.fullname" . }}-templates
+  labels:
+    {{- include "fastinx.labels" . | nindent 4 }}
+data:
+  default.conf.template: |
+    server {
+      listen 80 default_server;
+      return 301 https://$host$request_uri;
+    }
+
+    server {
+      listen ${SERVER_PORT} ssl;
+      server_name ${SERVER_NAME};
+
+      ssl_certificate     ${SSL_DIRECTORY}/tls.crt;
+      ssl_certificate_key ${SSL_DIRECTORY}/tls.key;
+
+      access_log  /var/log/nginx/access.log  main;
+      error_log   /var/log/nginx/error.log notice;
+
+      root ${ROOT_DIRECTORY};
+
+      index ${INDEX_FILES};
+      error_page 500 502 503 504 ${HTTP_50X_ERROR_PAGE};
+
+      location = ${HTTP_50X_ERROR_PAGE} {
+        root ${ERROR_PAGE_ROOT_DIRECTORY};
+      }
+
+      location / {
+        try_files $uri $uri/ /index.php?args;
+      }
+
+      location ~ [^/]\.php(/|$) {
+        fastcgi_split_path_info  ^(.+\.php)(/.+)$;
+        fastcgi_pass  ${APP_HOST}:${APP_PORT};
+
+        include       fastcgi_params;
+
+        fastcgi_intercept_errors on;
+
+        # Mitigate https://httpoxy.org/ vulnerabilities
+        fastcgi_param HTTP_PROXY "";
+        fastcgi_param PATH_INFO       $fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $ROOT_DIRECTORY$fastcgi_script_name;
+      }
+
+      {{- if .Values.app.staticContentCopyHelper.enabled }}
+      location ~* \.(${STATIC_CONTENT_EXTS})$ {
+        root ${ROOT_DIRECTORY};
+      }
+      {{- end }}
+
+      location ~ /\. {
+        deny all;
+      }
+    }
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "fastinx.fullname" . }}-copy-helper-entrypoint
+  labels:
+    {{- include "fastinx.labels" . | nindent 4 }}
+data:
+  entrypoint.sh: |
+    #!/bin/bash
+    set -e
+
+    isNotNull() {
+      variableName=$1
+
+      if test -z "${variableName}"
+      then
+        echo "The variable name is required."
+        exit 1
+      else
+        variableValue="${!variableName}"
+
+        if test -z "${variableValue}"
+        then
+          echo "The ${variableName} is required."
+          exit 1
+        fi
+      fi
+    }
+
+    isSamePath() {
+      from="$1"
+      to="$2"
+
+      isNotNull from
+      isNotNull to
+
+      if test $(realpath "${from}") == $(realpath "${to}")
+      then
+        echo "true"
+      else
+        echo "false"
+      fi
+    }
+
+    isNotNull COPY_FROM
+    isNotNull COPY_TO
+
+    if test "true" == $(isSamePath "${COPY_FROM}" "${COPY_TO}")
+    then
+      echo "ERROR: the source and destination directories are the same."
+      exit 1
+    fi
+
+    if test -d "${COPY_TO}"
+    then
+      for path in $(ls -A "${COPY_FROM}")
+      do
+        cp -r "${COPY_FROM}/${path}" "${COPY_TO}"
+      done
+    else
+      cp -r "${COPY_FROM}" "${COPY_TO}"
+    fi
+
+    echo "The source was copied to the target directory."
