@@ -80,11 +80,11 @@ data:
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ include "fastinx.fullname" . }}-copy-helper-entrypoint
+  name: {{ include "fastinx.fullname" . }}-copy-helper
   labels:
     {{- include "fastinx.labels" . | nindent 4 }}
 data:
-  entrypoint.sh: |
+  copy.sh: |
     #!/bin/bash
     set -e
 
