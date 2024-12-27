@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fastinx.fullname" . }}
+  labels:
+    {{- include "fastinx.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "fastinx.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "fastinx.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "fastinx.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.app.staticContentCopyHelper.enabled }}
+      initContainers:
+        - name: static-content-copy-helper
+          image: "{{ .Values.app.staticContentCopyHelper.image.repository }}:{{ .Values.app.staticContentCopyHelper.image.tag }}"
+          env:
+            - name: COPY_FROM
+              value: {{ .Values.app.staticContentCopyHelper.sourceDir }}
+            - name: COPY_TO
+              value: /static-content
+          command:
+            - bash
+          args:
+            - /usr/local/bin/entrypoint.sh
+          volumeMounts:
+            - name: copy-helper-entrypoint
+              mountPath: /usr/local/bin
+            - name: static-content
+              mountPath: /static-content
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: https
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ include "fastinx.livenessProbe" . }}
+              port: http
+          readinessProbe:
+            httpGet:
+              path: {{ include "fastinx.readinessProbe" . }}
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          envFrom:
+          - configMapRef:
+              name: {{ include "fastinx.fullname" . }}-envs
+          volumeMounts:
+          - name: cert
+            mountPath: {{ include "fastinx.sslDirectory" . }}
+          - name: static-content
+            mountPath: /usr/share/nginx/html
+          - name: templates
+            mountPath: /etc/nginx/templates
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: cert
+        secret:
+          secretName: {{ .Values.ingress.secretName }}
+          defaultMode: 0440
+      - name: templates
+        configMap:
+          name: {{ include "fastinx.fullname" . }}-templates
+          defaultMode: 0444
+      {{- if .Values.app.staticContentCopyHelper.enabled }}
+      - name: static-content
+        emptyDir: {}
+      - name: copy-helper-entrypoint
+        configMap:
+          name: {{ include "fastinx.fullname" . }}-copy-helper-entrypoint
+          defaultMode: 0110
+      {{- end }}
