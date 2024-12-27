@@ -65,26 +65,26 @@ Create the name of the service account to use
 Define the proxy's SSL directory.
 */}}
 {{- define "fastinx.sslDirectory" -}}
-{{- default "/etc/nginx/ssl" .Values.app.sslDirectory }}
+{{- default "/etc/nginx/ssl" .Values.sslDirectory }}
 {{- end }}
 
 {{/*
 Define the proxy's root directory.
 */}}
 {{- define "fastinx.rootDirectory" -}}
-{{- default "/usr/share/nginx/html" .Values.app.rootDirectory }}
+{{- default "/usr/share/nginx/html" .Values.rootDirectory }}
 {{- end }}
 
 {{/*
 Define the static content extension.
 */}}
-{{- define "fastinx.staticContentExt" -}}
-{{- default "ico|docx|doc|xls|xlsx|rar|zip|jpg|jpeg|txt|xml|pdf|gif|png|css|js" .Values.app.staticContentExt }}
+{{- define "fastinx.staticContent.extensions" -}}
+{{- default "ico|docx|doc|xls|xlsx|rar|zip|jpg|jpeg|txt|xml|pdf|gif|png|css|js" .Values.staticContent.extensions }}
 {{- end -}}
 
 {{- define "fastinx.livenessProbe" -}}
-{{- default "/favicon.ico" .Values.app.livenessProbe }}
+{{- default "/favicon.ico" .Values.livenessProbe }}
 {{- end -}}
 {{- define "fastinx.readinessProbe" -}}
-{{- default "/favicon.ico" .Values.app.readinessProbe }}
+{{- default "/favicon.ico" .Values.readinessProbe }}
 {{- end -}}
