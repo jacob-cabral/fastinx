@@ -77,7 +77,7 @@ spec:
             mountPath: {{ include "fastinx.sslDirectory" . }}
           {{- if .Values.staticContent.copyHelper.enabled }}
           - name: static-content
-            mountPath: /usr/share/nginx/html
+            mountPath: {{ include "fastinx.rootDirectory" . }}
           {{- end }}
           - name: templates
             mountPath: /etc/nginx/templates
