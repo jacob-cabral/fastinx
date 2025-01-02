@@ -79,7 +79,7 @@ Define the proxy's root directory.
 Define the static content extension.
 */}}
 {{- define "fastinx.staticContent.extensions" -}}
-{{- default "ico|docx|doc|xls|xlsx|rar|zip|jpg|jpeg|txt|xml|pdf|gif|png|css|js" .Values.staticContent.extensions }}
+{{- .Values.staticContent.extensions | join "|" }}
 {{- end -}}
 
 {{- define "fastinx.livenessProbe" -}}
