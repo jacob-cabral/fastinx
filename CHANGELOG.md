@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/jacob-cabral/fastinx/compare/v1.0.0...v1.0.1) (2025-01-23)
+
+
+### Bug Fixes
+
+* **ci:** remove duplicate actions related to GitHub Pages ([d52a57a](https://github.com/jacob-cabral/fastinx/commit/d52a57a63341433f0777e1c731a8decfe31de47d))
+
 # 1.0.0 (2025-01-23)
 
 
