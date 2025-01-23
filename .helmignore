@@ -21,3 +21,18 @@
 .idea/
 *.tmproj
 .vscode/
+# Binary files
+*.out
+*.exe
+*.dll
+*.so
+# Helm Chart packages
+*.tgz
+charts/*.tgz
+# CI/CD files
+node_modules/
+get_helm.sh
+index.yaml
+package.json
+package-lock.json
+release_output.txt

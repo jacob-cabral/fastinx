@@ -1,0 +1,136 @@
+name: Semantic Versioning and Helm Chart Release
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Semantic Release and Attach Helm Chart to GitHub Release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node.js (required for semantic-release)
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # Install NPM dependencies
+      - name: Install NPM dependencies
+        run: npm install
+
+      # Run Semantic Release to determine the version
+      - name: Run Semantic Release (Version Check)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx semantic-release --dry-run | tee release_output.txt
+          echo "NEW_VERSION=$(grep -oP '(?<=The next release version is )\S+' release_output.txt)" >> $GITHUB_ENV
+      
+      # Fail if the NEW_VERSION is empty
+      - name: Ensure non empty Helm Chart version
+        run: |
+          if [ -z "${{ env.NEW_VERSION }}" ]
+          then
+            echo "Error. The Helm Chart version cannot be empty."
+            exit 1
+          fi
+
+      # Update Chart.yaml with the new version
+      - name: Update Helm Chart version
+        run: |
+          sed -i "s/^version: .*/version: ${{ env.NEW_VERSION }}/" Chart.yaml
+
+      # Install Helm
+      - name: Install Helm
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+          chmod +x get_helm.sh
+          ./get_helm.sh
+
+      # Package the Helm Chart
+      - name: Package Helm Chart
+        run: |
+          helm lint
+          helm package .
+
+      # Create or update the index file
+      - name: Index the Helm Chart repository
+        run: helm repo index --merge index.yaml --url="${{ github.server_url }}/${{ github.repository }}/releases/download/v${{ env.NEW_VERSION }}" .
+
+      # Commit changes
+      - name: Commit changes
+        run: |
+          git config user.name "${{ github.event.pusher.name }}"
+          git config user.email "${{ github.event.pusher.email }}"
+          git add Chart.yaml index.yaml
+          git commit -m "chore: update the Helm Chart version and index"
+          git push
+      
+      # Share the Helm Chart repo files
+      - name: Share Helm Chart repo files
+        uses: actions/upload-artifact@v3
+        with:
+          name: shared-helm-chart-repo-files
+          path: 'index.yaml'
+
+
+      # Create GitHub tag with Semantic Release
+      - name: Run Semantic Release (Tag Creation)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx semantic-release
+
+  deploy:
+    name: Publish the Helm Chart info to GitHub Pages
+    needs: release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+    # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+
+    steps:
+      # Setup the GitHub Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # Download the shared Helm Chart repo files
+      - name: Download Helm Chart package
+        uses: actions/download-artifact@v3
+        with:
+          name: shared-helm-chart-repo-files
+          path: assets
+
+      # Upload the Helm Chart repo files
+      - name: Upload Helm Chart package
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: assets
+
+      # Deploy the GitHub Pages
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
