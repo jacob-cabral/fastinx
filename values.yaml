@@ -122,8 +122,9 @@ staticContent:
       tag: null
     sourceDir: null
 
-phpfpm:
-  rootDirectory: null
-  service:
-    host: null
-    port: null
+php:
+  fpm:
+    rootDirectory: null
+    service:
+      host: null
+      port: null

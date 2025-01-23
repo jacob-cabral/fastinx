@@ -8,9 +8,9 @@ data:
   ERROR_PAGE_ROOT_DIRECTORY: {{ default (include "fastinx.rootDirectory" .) .Values.errorPage.rootDirectory }}
   HTTP_50X_ERROR_PAGE: {{ default "/50x.html" .Values.errorPage.http50x}}
   INDEX_FILES: {{ default "index.php" .Values.indexFiles | quote }}
-  PHP_FPM_SERVICE_HOST: {{ .Values.phpfpm.service.host }}
-  PHP_FPM_SERVICE_PORT: {{ default 9000 .Values.phpfpm.service.port | quote }}
-  PHP_FPM_ROOT_DIRECTORY: {{ default (include "fastinx.rootDirectory" .) .Values.phpfpm.rootDirectory }}
+  PHP_FPM_SERVICE_HOST: {{ .Values.php.fpm.service.host }}
+  PHP_FPM_SERVICE_PORT: {{ default 9000 .Values.php.fpm.service.port | quote }}
+  PHP_FPM_ROOT_DIRECTORY: {{ default (include "fastinx.rootDirectory" .) .Values.php.fpm.rootDirectory }}
   ROOT_DIRECTORY: {{ include "fastinx.rootDirectory" . }}
   SERVER_NAME: {{ .Values.ingress.host | quote }}
   SERVER_PORT: {{ .Values.service.port | quote }}
