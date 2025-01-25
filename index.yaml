@@ -3,6 +3,21 @@ entries:
   fastinx:
   - apiVersion: v2
     appVersion: 1.25.3
+    created: "2025-01-25T02:42:07.494688582Z"
+    dependencies:
+    - alias: fpm
+      name: php-fpm
+      repository: https://jacob-cabral.github.io/php-fpm
+      version: ~1.4.7
+    description: A Helm Chart to deploy the NGINX as an HTTPS proxy to a FastCGI service
+    digest: 932484fe021942d16dac7bd42bfb26b48811d907b2b0f60351aa6bf0550edfda
+    name: fastinx
+    type: application
+    urls:
+    - https://github.com/jacob-cabral/fastinx/releases/download/v1.1.0/fastinx-1.1.0.tgz
+    version: 1.1.0
+  - apiVersion: v2
+    appVersion: 1.25.3
     created: "2025-01-23T01:43:50.908846495Z"
     description: A Helm Chart to deploy the NGINX as an HTTPS proxy to a FastCGI service
     digest: 0c26b0df2d4b0ef1c016c418fed58ffd5ecaafd446ce1cc897941a744596280a
@@ -21,4 +36,4 @@ entries:
     urls:
     - https://github.com/jacob-cabral/fastinx/releases/download/v1.0.0/fastinx-1.0.0.tgz
     version: 1.0.0
-generated: "2025-01-23T01:43:50.907963686Z"
+generated: "2025-01-25T02:42:07.492949433Z"
