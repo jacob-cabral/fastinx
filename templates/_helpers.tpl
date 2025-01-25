@@ -88,3 +88,28 @@ Define the static content extension.
 {{- define "fastinx.readinessProbe" -}}
 {{- default "/favicon.ico" .Values.readinessProbe }}
 {{- end -}}
+
+{{/*
+Expand the name of the FPM subchart.
+*/}}
+{{- define "fpm.name" -}}
+{{- default "fpm" .Values.fpm.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create a default fully qualified app name for the FPM subchart.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains subchart name it will be used as a full name.
+*/}}
+{{- define "fpm.fullname" -}}
+{{- if .Values.fpm.fullnameOverride }}
+{{- .Values.fpm.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default "fpm" .Values.fpm.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
