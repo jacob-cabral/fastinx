@@ -121,10 +121,3 @@ staticContent:
       repository: null
       tag: null
     sourceDir: null
-
-php:
-  fpm:
-    rootDirectory: null
-    service:
-      host: null
-      port: null

@@ -8,9 +8,8 @@ data:
   ERROR_PAGE_ROOT_DIRECTORY: {{ default (include "fastinx.rootDirectory" .) .Values.errorPage.rootDirectory }}
   HTTP_50X_ERROR_PAGE: {{ default "/50x.html" .Values.errorPage.http50x}}
   INDEX_FILES: {{ default "index.php" .Values.indexFiles | quote }}
-  PHP_FPM_SERVICE_HOST: {{ .Values.php.fpm.service.host }}
-  PHP_FPM_SERVICE_PORT: {{ default 9000 .Values.php.fpm.service.port | quote }}
-  PHP_FPM_ROOT_DIRECTORY: {{ default (include "fastinx.rootDirectory" .) .Values.php.fpm.rootDirectory }}
+  FPM_SERVICE_HOST: {{ include "fpm.fullname" . }}
+  FPM_SERVICE_PORT: {{ default 9000 .Values.fpm.service.port | quote }}
   ROOT_DIRECTORY: {{ include "fastinx.rootDirectory" . }}
   SERVER_NAME: {{ .Values.ingress.host | quote }}
   SERVER_PORT: {{ .Values.service.port | quote }}
@@ -55,7 +54,7 @@ data:
 
       location ~ [^/]\.php(/|$) {
         fastcgi_split_path_info  ^(.+\.php)(/.+)$;
-        fastcgi_pass  ${PHP_FPM_SERVICE_HOST}:${PHP_FPM_SERVICE_PORT};
+        fastcgi_pass  ${FPM_SERVICE_HOST}:${FPM_SERVICE_PORT};
 
         include       fastcgi_params;
 
@@ -64,7 +63,7 @@ data:
         # Mitigate https://httpoxy.org/ vulnerabilities
         fastcgi_param HTTP_PROXY "";
         fastcgi_param PATH_INFO       $fastcgi_path_info;
-        fastcgi_param SCRIPT_FILENAME ${PHP_FPM_ROOT_DIRECTORY}$fastcgi_script_name;
+        fastcgi_param SCRIPT_FILENAME ${ROOT_DIRECTORY}$fastcgi_script_name;
       }
 
       {{- if .Values.staticContent.copyHelper.enabled }}
