@@ -1,3 +1,19 @@
+# [1.1.0](https://github.com/jacob-cabral/fastinx/compare/v1.0.1...v1.1.0) (2025-01-25)
+
+
+### Bug Fixes
+
+* add the Git submodule ([5e53b3a](https://github.com/jacob-cabral/fastinx/commit/5e53b3ad467ddd6d6eef093d424bd88e7fb6edf7))
+* **ci:** checkout the Git submodule ([0899370](https://github.com/jacob-cabral/fastinx/commit/089937056e9b134818efbe9745015fbdd7871246))
+* ignore GitHub Actions' files ([963e204](https://github.com/jacob-cabral/fastinx/commit/963e2041220143d2546cdb15d8832668c54f6be5))
+* update the Git submodule ([7d5615c](https://github.com/jacob-cabral/fastinx/commit/7d5615cd0703dd06d43e6b4d8d0a5eddc3f1d2e5))
+
+
+### Features
+
+* add the PHP FPM as a dependency ([6c71ad2](https://github.com/jacob-cabral/fastinx/commit/6c71ad204c27c1ac6dddb1ea9e53e1bbff04574c))
+* add the PHP FPM named templates ([175ad59](https://github.com/jacob-cabral/fastinx/commit/175ad595d7279eb36ae1481a24237bcae71bc056))
+
 ## [1.0.1](https://github.com/jacob-cabral/fastinx/compare/v1.0.0...v1.0.1) (2025-01-23)
 
 
