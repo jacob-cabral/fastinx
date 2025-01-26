@@ -70,17 +70,20 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           envFrom:
-          - configMapRef:
-              name: {{ include "fastinx.fullname" . }}-envs
+            - configMapRef:
+                name: {{ include "fastinx.fullname" . }}-envs
           volumeMounts:
-          - name: cert
-            mountPath: {{ include "fastinx.sslDirectory" . }}
-          {{- if .Values.staticContent.copyHelper.enabled }}
-          - name: static-content
-            mountPath: {{ include "fastinx.rootDirectory" . }}
+            - name: cert
+              mountPath: {{ include "fastinx.sslDirectory" . }}
+            {{- if .Values.staticContent.copyHelper.enabled }}
+            - name: static-content
+              mountPath: {{ include "fastinx.rootDirectory" . }}
+            {{- end }}
+            - name: templates
+              mountPath: /etc/nginx/templates
+          {{- with .Values.fpm.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
-          - name: templates
-            mountPath: /etc/nginx/templates
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -94,19 +97,22 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-      - name: cert
-        secret:
-          secretName: {{ .Values.ingress.secretName }}
-          defaultMode: 0440
-      - name: templates
-        configMap:
-          name: {{ include "fastinx.fullname" . }}-templates
-          defaultMode: 0444
-      {{- if .Values.staticContent.copyHelper.enabled }}
-      - name: static-content
-        emptyDir: {}
-      - name: copy-helper
-        configMap:
-          name: {{ include "fastinx.fullname" . }}-copy-helper
-          defaultMode: 0110
+        - name: cert
+          secret:
+            secretName: {{ .Values.ingress.secretName }}
+            defaultMode: 0440
+        - name: templates
+          configMap:
+            name: {{ include "fastinx.fullname" . }}-templates
+            defaultMode: 0444
+        {{- if .Values.staticContent.copyHelper.enabled }}
+        - name: static-content
+          emptyDir: {}
+        - name: copy-helper
+          configMap:
+            name: {{ include "fastinx.fullname" . }}-copy-helper
+            defaultMode: 0110
+      {{- end }}
+      {{- with .Values.fpm.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}

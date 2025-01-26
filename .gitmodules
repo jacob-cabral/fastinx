@@ -1,4 +1,4 @@
 [submodule "php-fpm"]
 	path = charts/php-fpm
 	url = git@github.com:jacob-cabral/php-fpm.git
-	branch = v1.4.9
+	branch = v1.5.0
