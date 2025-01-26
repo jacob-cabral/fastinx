@@ -121,3 +121,6 @@ staticContent:
       repository: null
       tag: null
     sourceDir: null
+
+fpm:
+  service: {}
