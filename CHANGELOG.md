@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/jacob-cabral/fastinx/compare/v1.1.1...v1.1.2) (2025-01-26)
+
+
+### Bug Fixes
+
+* update the PHP FPM submodule ([d7cd647](https://github.com/jacob-cabral/fastinx/commit/d7cd64795f366d2a0766ec3fc441c24515bdcea2))
+
 ## [1.1.1](https://github.com/jacob-cabral/fastinx/compare/v1.1.0...v1.1.1) (2025-01-26)
 
 
