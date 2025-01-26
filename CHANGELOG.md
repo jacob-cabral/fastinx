@@ -1,3 +1,15 @@
+# [1.2.0](https://github.com/jacob-cabral/fastinx/compare/v1.1.2...v1.2.0) (2025-01-26)
+
+
+### Bug Fixes
+
+* nil pointer evaluating interface ([22cc81b](https://github.com/jacob-cabral/fastinx/commit/22cc81b31e408024b5ffeeee053821add9fa87af))
+
+
+### Features
+
+* add support to extra volumes ([2679874](https://github.com/jacob-cabral/fastinx/commit/26798744d55cbd7371b6b4379a0fd2d34f234bbb))
+
 ## [1.1.2](https://github.com/jacob-cabral/fastinx/compare/v1.1.1...v1.1.2) (2025-01-26)
 
 
